@@ -9,12 +9,12 @@ export class Wating extends BaseScene {
   preload() {
     this.loadImages({
       bg: "bg.jpg",
-      sound_on: "sound_on.png", sound_off: "sound_off.png"
+      soundOn: "soundOn.png", soundOff: "soundOff.png"
     });
   }
   createSoundUI() {
-    let soundOn = this.add.sprite(this.canX(0.8), 50, "sound_on");
-    let soundOff = this.add.sprite(this.canX(0.9), 50, "sound_off");
+    let soundOn = this.add.sprite(this.canX(0.8), 50, "soundOn");
+    let soundOff = this.add.sprite(this.canX(0.9), 50, "soundOff");
     const setSound = (on: boolean) => {
       const soundScale = 0.6;
       soundOn.setScale(on ? 1 : soundScale);

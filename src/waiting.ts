@@ -1,10 +1,9 @@
 import * as Phaser from 'phaser';
-import { BaseScene } from './base_scene';
-import * as Settings from './settings';
+import { BaseScene } from './baseScene';
 
 export class Wating extends BaseScene {
   constructor() {
-    super('Prepare');
+    super('Wating');
   }
   preload() {
     this.loadImages({
@@ -37,5 +36,11 @@ export class Wating extends BaseScene {
       'Rotation Jump',
       this.canX(0.5), this.canY(0.5), 0.5,
       { fontSize: '60px' });
+    const startText = this.addText(
+      'Click here to start game.',
+      this.canX(0.5), this.canY(0.7), 0.5, { fontSize: "30px" });
+    startText.on('pointerdown', () => {
+      this.scene.start('GameMain');
+    });
   }
 }

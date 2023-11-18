@@ -1,11 +1,11 @@
 import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
-import { Model } from './model';
+import { Model, GameScene } from './model';
 
-export class GameMain extends BaseScene {
+export class GameMain extends BaseScene implements GameScene {
   p: Phaser.GameObjects.Sprite[] = [];
   items: Phaser.GameObjects.Sprite[] = [];
-  model: Model = new Model();
+  model: Model = new Model(this);
   constructor() {
     super('GameMain');
   }
@@ -34,6 +34,9 @@ export class GameMain extends BaseScene {
   pSprite(): Phaser.GameObjects.Sprite {
     return this.p[this.model.imageIx()];
   }
+  onDotEat(ix: integer): void {
+  }
+
   update() {
     this.model.progress(0 != (this.input.mousePointer.buttons & 1));
     for (let i = 0; i < this.p.length; i++) {

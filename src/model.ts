@@ -1,3 +1,4 @@
+import { Game } from 'phaser';
 import * as Settings from './settings';
 
 type Rectangle = Phaser.Geom.Rectangle;
@@ -55,6 +56,10 @@ class Item {
   }
 }
 
+export interface GameScene {
+  onDotEat(ix: integer): void;
+}
+
 export class Model {
   hitRadius(): number { return 50; }
   stage: Rectangle = new Rectangle(spliteR, spliteR, Settings.bgSize.x - spliteR * 2, Settings.bgSize.y - spliteR * 2);
@@ -63,7 +68,9 @@ export class Model {
       this.stage.left + this.stage.width * 0.9,
       this.stage.top + this.stage.height * 0.9));
   items: Item[] = [];
-  constructor() {
+  gScene: GameScene;
+  constructor(gScene: GameScene) {
+    this.gScene = gScene;
     const x = (rx: number): number => {
       return this.stage.left + this.stage.width * rx;
     };

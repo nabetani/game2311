@@ -56,6 +56,7 @@ class Item {
 }
 
 export class Model {
+  hitRadius(): number { return 50; }
   stage: Rectangle = new Rectangle(spliteR, spliteR, Settings.bgSize.x - spliteR * 2, Settings.bgSize.y - spliteR * 2);
   player: Player = new Player(
     new Vector2(
@@ -83,7 +84,7 @@ export class Model {
   progress(down: boolean) {
     this.player.progress(down, this.stage);
     for (let i of this.items) {
-      if (i.pos.distance(this.player.pos) < 90) {
+      if (i.pos.distance(this.player.pos) < this.hitRadius()) {
         i.visible = false;
       }
     }

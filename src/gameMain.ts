@@ -29,13 +29,13 @@ export class GameMain extends BaseScene {
     return this.p[this.model.imageIx()];
   }
   update() {
-    this.model.notifyButtonState(0 != (this.input.mousePointer.buttons & 1));
-    this.model.progress()
+    this.model.progress(0 != (this.input.mousePointer.buttons & 1));
     for (let i = 0; i < this.p.length; i++) {
       this.p[i].setVisible(this.model.imageIx() == i);
     }
     const p = this.pSprite();
     p.setAngle(this.model.pAngle());
-    p.setPosition(this.model.pos.x, this.model.pos.y);
+    const pos = this.model.player.pos;
+    p.setPosition(pos.x, pos.y);
   }
 }

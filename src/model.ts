@@ -19,7 +19,7 @@ const clamp = (x: number, v0: number, v1: number): number => {
 }
 
 class Player {
-  angle: number = 0;
+  angle: number = -30;
   deltaAngle: number = 0;
   velo: number = 0;
   pos: Vector2;
@@ -45,9 +45,35 @@ class Player {
   }
 };
 
+class Item {
+  pos: Vector2;
+  name: string;
+  visible: boolean = true;
+  constructor(pos: Vector2, name: string) {
+    this.pos = pos;
+    this.name = name;
+  }
+}
+
 export class Model {
   stage: Rectangle = new Rectangle(spliteR, spliteR, Settings.bgSize.x - spliteR * 2, Settings.bgSize.y - spliteR * 2);
-  player: Player = new Player(centerOfRect(this.stage));
+  player: Player = new Player(
+    new Vector2(
+      this.stage.left + this.stage.width * 0.9,
+      this.stage.top + this.stage.height * 0.9));
+  items: Item[] = [];
+  constructor() {
+    const x = (rx: number): number => {
+      return this.stage.left + this.stage.width * rx;
+    };
+    for (let ry = 0.1; ry < 0.9; ry += 0.05) {
+      const y = this.stage.top + this.stage.height * ry;
+      this.items.push(new Item(new Vector2(x(0.2), y), "t0"));
+      this.items.push(new Item(new Vector2(x(0.4), y), "t0"));
+      this.items.push(new Item(new Vector2(x(0.6), y), "t0"));
+      this.items.push(new Item(new Vector2(x(0.8), y), "t0"));
+    }
+  }
   imageIx(): integer {
     return 0;
   }
@@ -56,6 +82,11 @@ export class Model {
   }
   progress(down: boolean) {
     this.player.progress(down, this.stage);
+    for (let i of this.items) {
+      if (i.pos.distance(this.player.pos) < 90) {
+        i.visible = false;
+      }
+    }
   }
   position(): Phaser.Math.Vector2 {
     return this.player.pos;

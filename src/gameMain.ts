@@ -4,6 +4,7 @@ import { Model } from './model';
 
 export class GameMain extends BaseScene {
   p: Phaser.GameObjects.Sprite[] = [];
+  items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model();
   constructor() {
     super('GameMain');
@@ -24,6 +25,11 @@ export class GameMain extends BaseScene {
     zone.setInteractive();
     zone.on('pointerup', () => { this.model.pointerup(); });
     zone.on('pointerdown', () => { this.model.pointerdown(); });
+    for (let i of this.model.items) {
+      const s = this.add.sprite(i.pos.x, i.pos.y, "p0");
+      this.items.push(s)
+      s.setScale(0.3);
+    }
   }
   pSprite(): Phaser.GameObjects.Sprite {
     return this.p[this.model.imageIx()];
@@ -37,5 +43,8 @@ export class GameMain extends BaseScene {
     p.setAngle(this.model.pAngle());
     const pos = this.model.player.pos;
     p.setPosition(pos.x, pos.y);
+    for (let ix = 0; ix < this.items.length; ++ix) {
+      this.items[ix].setVisible(this.model.items[ix].visible);
+    }
   }
 }

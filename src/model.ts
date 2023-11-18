@@ -13,13 +13,15 @@ export class Model {
     return this.myAngle;
   }
   notifyButtonState(down: boolean) {
-    if (down) {
-      this.deltaAngle = this.deltaAngle + Math.min(0.1, 1.0 / (0.1 + this.deltaAngle));
-      this.velo *= 0.8;
-      this.poteVelo += 0.2 + 1 / (this.poteVelo + 1);
-    } else {
-      this.velo *= 0.95;
+    let accAngle = down ? -0.1 : 0.1;
+    let a2 = accAngle * this.deltaAngle;
+    let ra4p = 1 / (a2 * a2 + 1);
+    this.velo *= ra4p;
+    this.velo += 0.1 * ra4p;
+    if (a2 < 0) {
+      accAngle *= 10;
     }
+    this.deltaAngle += accAngle;
     this.myAngle += this.deltaAngle;
     let t = (-90 + this.myAngle) * Math.PI / 180;
     this.pos.x += this.velo * Math.cos(t)
@@ -29,11 +31,7 @@ export class Model {
     return this.pos;
   }
   pointerup() {
-    this.velo = this.poteVelo;
-    this.poteVelo = 0;
-    this.deltaAngle = 0;
   }
   pointerdown() {
-
   }
 }

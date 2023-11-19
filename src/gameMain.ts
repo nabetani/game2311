@@ -47,6 +47,7 @@ class Driving extends PhaseType {
     ++this.tick;
     this.scene.setGoText(this.tick);
     this.scene.progressDriving(1);
+    this.scene.showTick(this.tick);
     return this.scene.model.isCompleted() ? new YouDidIt(this.scene) : this;
   }
 }
@@ -72,6 +73,7 @@ export class GameMain extends BaseScene implements GameScene {
   model: Model = new Model(this);
   phase: Phase = new Countdown(this);
   countDownText: Phaser.GameObjects.Text | null = null
+  tickText: Phaser.GameObjects.Text | null = null
   constructor() {
     super('GameMain');
   }
@@ -110,8 +112,18 @@ export class GameMain extends BaseScene implements GameScene {
       '3',
       this.canX(0.5), this.canY(0.5), 0.5,
       { fontSize: '120px' });
+    this.tickText = this.addText(
+      '',
+      this.canX(0.05), this.canY(0.05), 0,
+      { fontSize: '40px' });
   }
 
+  showTick(tick: number) {
+    let sec = tick / this.fps();
+    let i = Math.floor(sec);
+    let f = `00${(sec - i) * 100}`.slice(-2)
+    this.tickText?.setText(`${i}.${f} s`);
+  }
   setGoText(tick: number) {
     const t = tick / 30 - 1;
     if (t < 0) {

@@ -2,10 +2,35 @@ import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
 
+type Phase = Countdown | Driving
+
+class Countdown {
+  tick: number = 0
+  scene: GameScene;
+  constructor(scene: GameScene) {
+    this.scene = scene;
+  }
+  progress(): Phase {
+    ++this.tick;
+    return this.tick < 3 ? this : new Driving(this.scene);
+  }
+}
+
+class Driving {
+  scene: GameScene;
+  constructor(scene: GameScene) {
+    this.scene = scene;
+  }
+  progress(): Phase {
+    return this;
+  }
+}
+
 export class GameMain extends BaseScene implements GameScene {
   p: Phaser.GameObjects.Sprite[] = [];
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
+  phase: Phase = new Countdown(this);
   constructor() {
     super('GameMain');
   }
@@ -37,8 +62,13 @@ export class GameMain extends BaseScene implements GameScene {
   onDotEat(ix: integer): void {
   }
 
+  isPressing(): boolean {
+    return 0 != (this.input.activePointer.buttons & 1);
+  }
+
   update() {
-    this.model.progress(0 != (this.input.mousePointer.buttons & 1));
+    this.phase = this.phase.progress();
+    this.model.progress(this.isPressing());
     for (let i = 0; i < this.p.length; i++) {
       this.p[i].setVisible(this.model.imageIx() == i);
     }

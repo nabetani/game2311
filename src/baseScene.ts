@@ -3,6 +3,7 @@ import * as Phaser from 'phaser';
 export class BaseScene extends Phaser.Scene {
   canX(ratio: number = 1.0): number { return this.sys.game.canvas.width * ratio }
   canY(ratio: number = 1.0): number { return this.sys.game.canvas.height * ratio }
+  fps(): number { return this.game.config.fps.target!; }
 
   sprites: { [key: string]: Phaser.GameObjects.Sprite } = {};
 

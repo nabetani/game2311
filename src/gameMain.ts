@@ -33,7 +33,7 @@ class Countdown extends PhaseType {
     ++this.tick;
     this.scene.progressDriving(0);
     this.scene.setCountDownText(this.tick);
-    return this.tick < 3 * 60 ? this : new Driving(this.scene);
+    return this.tick < 3 * this.scene.fps() ? this : new Driving(this.scene);
   }
 }
 
@@ -131,7 +131,7 @@ export class GameMain extends BaseScene implements GameScene {
   }
 
   setCountDownText(tick: number) {
-    const t = 3 - tick / 60;
+    const t = 3 - tick / this.fps();
     const ft = Math.floor(t + 0.5);
     const ft2 = Math.floor(t * 2 + 1) / 2;
     this.countDownText?.setAlpha(1);

@@ -84,9 +84,11 @@ class Item {
 class Line {
   readonly p0: Vector2;
   readonly p1: Vector2;
-  constructor(points: Vector2[], ix: integer) {
+  readonly curve: number;
+  constructor(points: Vector2[], ix: integer, curve: number) {
     this.p0 = points[ix];
     this.p1 = points[(ix + 1) % points.length];
+    this.curve = curve;
   };
   len(): number {
     return this.p0.distance(this.p1);
@@ -106,23 +108,27 @@ export interface GameScene {
 
 const itemPositions = (stage: Rectangle): Vector2[] => {
   const g = stage.width / 10;
+  const x0 = g;
+  const x3 = stage.right - g;
+  const x1 = (x0 * 2 + x3) / 3;
+  const x2 = (x0 + x3 * 2) / 3;
+  const y0 = 100;
+  const y2 = stage.bottom - 100;
+  const y1 = (y0 * 2 + y2) / 3;
   let points: Vector2[] = [
-    v2(g, g),
-    v2(stage.right - g, g),
-    v2(stage.right - g, stage.bottom - g),
-    v2(g, stage.bottom - g),
+    v2(x0, y0), v2(x0, y2),
+    v2(x1, y2), v2(x1, y1),
+    v2(x2, y1), v2(x2, y2),
+    v2(x3, y2), v2(x3, y0),
   ];
-  const paths = [
-    new Line(points, 0),
-    new Line(points, 1),
-    new Line(points, 2),
-    new Line(points, 3),
-  ]
+  const paths = Array.from(points.keys()).map((ix) => {
+    return new Line(points, ix, (ix % 2) * 2 - 1);
+  });
   const total = paths.reduce((acc, cur): number => {
     return acc + cur.len();
   }, 0);
   let r: Vector2[] = [];
-  const nofItems = 20;
+  const nofItems = 50;
   for (let i = 0; i < nofItems; i++) {
     let lpos = total * i / nofItems;
     for (let p of paths) {

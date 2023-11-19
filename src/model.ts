@@ -30,17 +30,17 @@ class Player {
   progress(down: boolean, v: number, stage: Rectangle) {
     let accAngle = down ? -0.1 : 0.1;
     let a2 = accAngle * this.deltaAngle;
-    let ra4p = v / (a2 * a2 + 1);
+    let ra4p = 1 / (a2 * a2 + 1);
     this.velo *= ra4p;
-    this.velo += v * 0.1 * ra4p;
+    this.velo += 1 * 0.1 * ra4p;
     if (a2 < 0) {
       accAngle *= 10;
     }
     this.deltaAngle += accAngle;
     this.angle += this.deltaAngle;
     let t = (-90 + this.angle) * Math.PI / 180;
-    this.pos.x += this.velo * Math.cos(t);
-    this.pos.y += this.velo * Math.sin(t);
+    this.pos.x += v * this.velo * Math.cos(t);
+    this.pos.y += v * this.velo * Math.sin(t);
     this.pos.x = clamp(this.pos.x, stage.left, stage.right);
     this.pos.y = clamp(this.pos.y, stage.bottom, stage.top);
   }

@@ -83,7 +83,7 @@ export class Model {
     const x = (rx: number): number => {
       return this.stage.left + this.stage.width * rx;
     };
-    for (let ry = 0.1; ry < 0.9; ry += 0.05) {
+    for (let ry = 0.1; ry < 0.2; ry += 0.05) {
       const y = this.stage.top + this.stage.height * ry;
       this.items.push(new Item(new Vector2(x(0.2), y), "t0"));
       this.items.push(new Item(new Vector2(x(0.4), y), "t0"));
@@ -97,6 +97,11 @@ export class Model {
   pAngle(): number {
     return this.player.angle;
   }
+  isCompleted(): boolean {
+    console.log(this.items);
+    return this.items.every(e => { return !e.visible });
+  }
+
   progress(down: boolean, v: number) {
     this.player.progress(down, v, this.stage);
     const poiPos = this.player.poiPos();

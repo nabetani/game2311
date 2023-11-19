@@ -3,12 +3,24 @@ import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
 import { Vector } from 'matter';
 
-type Phase = Countdown | Driving
+type Phase = Countdown | Driving | YouDidIt;
 
 class PhaseType {
   scene: GameMain;
   constructor(scene: GameMain) {
     this.scene = scene;
+  }
+}
+
+class YouDidIt extends PhaseType {
+  tick: number = 0
+  constructor(scene: GameMain) {
+    super(scene);
+    scene.startYouDidIt();
+  }
+  progress(): Phase {
+    ++this.tick;
+    return this;
   }
 }
 
@@ -35,7 +47,7 @@ class Driving extends PhaseType {
     ++this.tick;
     this.scene.setGoText(this.tick);
     this.scene.progressDriving(1);
-    return this;
+    return this.scene.model.isCompleted() ? new YouDidIt(this.scene) : this;
   }
 }
 
@@ -110,7 +122,9 @@ export class GameMain extends BaseScene implements GameScene {
       this.countDownText?.setText("");
     }
   }
-
+  startYouDidIt() {
+    this.countDownText?.setText("");
+  }
   startDriving() {
     this.countDownText?.setAlpha(1);
     this.countDownText?.setText("GO!");

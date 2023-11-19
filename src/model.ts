@@ -27,12 +27,12 @@ class Player {
   constructor(pos: Vector2) {
     this.pos = pos;
   }
-  progress(down: boolean, stage: Rectangle) {
+  progress(down: boolean, v: number, stage: Rectangle) {
     let accAngle = down ? -0.1 : 0.1;
     let a2 = accAngle * this.deltaAngle;
-    let ra4p = 1 / (a2 * a2 + 1);
+    let ra4p = v / (a2 * a2 + 1);
     this.velo *= ra4p;
-    this.velo += 0.1 * ra4p;
+    this.velo += v * 0.1 * ra4p;
     if (a2 < 0) {
       accAngle *= 10;
     }
@@ -57,7 +57,7 @@ class Item {
 }
 
 export interface GameScene {
-  onDotStateChanged(ix: integer): void;
+  onItemStateChanged(ix: integer): void;
 }
 
 export class Model {
@@ -88,14 +88,14 @@ export class Model {
   pAngle(): number {
     return this.player.angle;
   }
-  progress(down: boolean) {
-    this.player.progress(down, this.stage);
+  progress(down: boolean, v: number) {
+    this.player.progress(down, v, this.stage);
     for (let ix = 0; ix < this.items.length; ix++) {
       const i = this.items[ix];
       if (i.pos.distance(this.player.pos) < this.hitRadius()) {
         if (i.visible) {
           i.visible = false;
-          this.gScene.onDotStateChanged(ix);
+          this.gScene.onItemStateChanged(ix);
         }
       }
     }

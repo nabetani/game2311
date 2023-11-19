@@ -6,22 +6,24 @@ type Phase = Countdown | Driving
 
 class Countdown {
   tick: number = 0
-  scene: GameScene;
-  constructor(scene: GameScene) {
+  scene: GameMain;
+  constructor(scene: GameMain) {
     this.scene = scene;
   }
   progress(): Phase {
     ++this.tick;
-    return this.tick < 3 ? this : new Driving(this.scene);
+    this.scene.progressDriving(0);
+    return this.tick < 3 * 60 ? this : new Driving(this.scene);
   }
 }
 
 class Driving {
-  scene: GameScene;
-  constructor(scene: GameScene) {
+  scene: GameMain;
+  constructor(scene: GameMain) {
     this.scene = scene;
   }
   progress(): Phase {
+    this.scene.progressDriving(1);
     return this;
   }
 }
@@ -59,7 +61,7 @@ export class GameMain extends BaseScene implements GameScene {
   pSprite(): Phaser.GameObjects.Sprite {
     return this.p[this.model.imageIx()];
   }
-  onDotStateChanged(ix: integer): void {
+  onItemStateChanged(ix: integer): void {
     this.items[ix].setVisible(this.model.items[ix].visible);
   }
 
@@ -67,9 +69,8 @@ export class GameMain extends BaseScene implements GameScene {
     return 0 != (this.input.activePointer.buttons & 1);
   }
 
-  update() {
-    this.phase = this.phase.progress();
-    this.model.progress(this.isPressing());
+  progressDriving(v: number) {
+    this.model.progress(this.isPressing(), v);
     for (let i = 0; i < this.p.length; i++) {
       this.p[i].setVisible(this.model.imageIx() == i);
     }
@@ -77,5 +78,9 @@ export class GameMain extends BaseScene implements GameScene {
     p.setAngle(this.model.pAngle());
     const pos = this.model.player.pos;
     p.setPosition(pos.x, pos.y);
+  }
+
+  update() {
+    this.phase = this.phase.progress();
   }
 }

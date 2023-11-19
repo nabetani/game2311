@@ -4,25 +4,35 @@ import { Model, GameScene } from './model';
 
 type Phase = Countdown | Driving
 
-class Countdown {
-  tick: number = 0
+class PhaseType {
   scene: GameMain;
   constructor(scene: GameMain) {
     this.scene = scene;
+  }
+}
+
+class Countdown extends PhaseType {
+  tick: number = 0
+  constructor(scene: GameMain) {
+    super(scene);
   }
   progress(): Phase {
     ++this.tick;
     this.scene.progressDriving(0);
+    this.scene.setCountDownText(this.tick);
     return this.tick < 3 * 60 ? this : new Driving(this.scene);
   }
 }
 
-class Driving {
-  scene: GameMain;
+class Driving extends PhaseType {
+  tick: number = 0
   constructor(scene: GameMain) {
-    this.scene = scene;
+    super(scene);
+    scene.startDriving();
   }
   progress(): Phase {
+    ++this.tick;
+    this.scene.setGoText(this.tick);
     this.scene.progressDriving(1);
     return this;
   }
@@ -33,6 +43,7 @@ export class GameMain extends BaseScene implements GameScene {
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
   phase: Phase = new Countdown(this);
+  countDownText: Phaser.GameObjects.Text | null = null
   constructor() {
     super('GameMain');
   }
@@ -57,7 +68,36 @@ export class GameMain extends BaseScene implements GameScene {
       this.items.push(s)
       s.setScale(0.3);
     }
+    this.countDownText = this.addText(
+      '3',
+      this.canX(0.5), this.canY(0.5), 0.5,
+      { fontSize: '120px' });
   }
+
+  setGoText(tick: number) {
+    const t = tick / 30 - 1;
+    if (t < 0) {
+      return;
+    } else if (t < 1) {
+      this.countDownText?.setAlpha(1 - t)
+    } else {
+      this.countDownText?.setText("");
+    }
+  }
+
+  startDriving() {
+    this.countDownText?.setAlpha(1);
+    this.countDownText?.setText("GO!");
+  }
+
+  setCountDownText(tick: number) {
+    const t = 3 - tick / 60;
+    const ft = Math.floor(t + 0.5);
+    const ft2 = Math.floor(t * 2 + 1) / 2;
+    this.countDownText?.setAlpha(1);
+    this.countDownText?.setText((ft == ft2) ? `${ft}` : "");
+  }
+
   pSprite(): Phaser.GameObjects.Sprite {
     return this.p[this.model.imageIx()];
   }

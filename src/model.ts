@@ -53,11 +53,9 @@ class Player {
 
 class Item {
   pos: Vector2;
-  name: string;
   visible: boolean = true;
-  constructor(pos: Vector2, name: string) {
+  constructor(pos: Vector2) {
     this.pos = pos;
-    this.name = name;
   }
 }
 
@@ -81,10 +79,10 @@ export class Model {
     };
     for (let ry = 0.1; ry < 0.2; ry += 0.05) {
       const y = this.stage.top + this.stage.height * ry;
-      this.items.push(new Item(new Vector2(x(0.2), y), "t0"));
-      this.items.push(new Item(new Vector2(x(0.4), y), "t0"));
-      this.items.push(new Item(new Vector2(x(0.6), y), "t0"));
-      this.items.push(new Item(new Vector2(x(0.8), y), "t0"));
+      this.items.push(new Item(new Vector2(x(0.2), y)));
+      this.items.push(new Item(new Vector2(x(0.4), y)));
+      this.items.push(new Item(new Vector2(x(0.6), y)));
+      this.items.push(new Item(new Vector2(x(0.8), y)));
     }
   }
   imageIx(): integer {

@@ -44,7 +44,8 @@ class Player {
     if (a2 < 0) {
       accAngle *= 10;
     }
-    this.deltaAngle += accAngle;
+    const deltaAngleLimit = 10;
+    this.deltaAngle = clamp(this.deltaAngle + accAngle, -deltaAngleLimit, deltaAngleLimit);
     this.angle += this.deltaAngle;
     let t = (-90 + this.angle) * Math.PI / 180;
     this.pos.x += v * this.velo * Math.cos(t);

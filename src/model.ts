@@ -57,7 +57,7 @@ class Item {
 }
 
 export interface GameScene {
-  onDotEat(ix: integer): void;
+  onDotStateChanged(ix: integer): void;
 }
 
 export class Model {
@@ -90,9 +90,13 @@ export class Model {
   }
   progress(down: boolean) {
     this.player.progress(down, this.stage);
-    for (let i of this.items) {
+    for (let ix = 0; ix < this.items.length; ix++) {
+      const i = this.items[ix];
       if (i.pos.distance(this.player.pos) < this.hitRadius()) {
-        i.visible = false;
+        if (i.visible) {
+          i.visible = false;
+          this.gScene.onDotStateChanged(ix);
+        }
       }
     }
   }

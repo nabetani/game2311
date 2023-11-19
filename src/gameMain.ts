@@ -59,7 +59,8 @@ export class GameMain extends BaseScene implements GameScene {
   pSprite(): Phaser.GameObjects.Sprite {
     return this.p[this.model.imageIx()];
   }
-  onDotEat(ix: integer): void {
+  onDotStateChanged(ix: integer): void {
+    this.items[ix].setVisible(this.model.items[ix].visible);
   }
 
   isPressing(): boolean {
@@ -76,8 +77,5 @@ export class GameMain extends BaseScene implements GameScene {
     p.setAngle(this.model.pAngle());
     const pos = this.model.player.pos;
     p.setPosition(pos.x, pos.y);
-    for (let ix = 0; ix < this.items.length; ++ix) {
-      this.items[ix].setVisible(this.model.items[ix].visible);
-    }
   }
 }

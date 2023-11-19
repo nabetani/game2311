@@ -39,6 +39,22 @@ class Driving extends PhaseType {
   }
 }
 
+const xorshift32 = (n: number): integer => {
+  const x = (e: integer): integer => {
+    e ^= (e << 13);
+    e >>>= 0;
+    e ^= e >> 17;
+    e >>>= 0;
+    e ^= (e << 5);
+    return e >>> 0;
+  };
+  n += 123; // 全ゼロ回避
+  for (let i = 0; i < 20; ++i) {
+    n = x(n);
+  }
+  return n;
+};
+
 export class GameMain extends BaseScene implements GameScene {
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
@@ -48,11 +64,18 @@ export class GameMain extends BaseScene implements GameScene {
     super('GameMain');
   }
   preload() {
+    const tights = (): { [key: string]: string } => {
+      let r: { [key: string]: string } = {}
+      for (let i = 0; i < 8; ++i) {
+        r[`t${i}`] = `t${i}.png`;
+      }
+      return r;
+    };
     this.loadImages({
       mainBG: "mainBG.jpg",
       ship: "ship.png",
       poi: "poi.png",
-      p0: "p0.png",
+      ...tights()
     });
   }
 
@@ -66,9 +89,10 @@ export class GameMain extends BaseScene implements GameScene {
     this.addSprite(0, -1000, "ship");
     this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
     for (let i of this.model.items) {
-      const s = this.add.sprite(i.pos.x, i.pos.y, "p0");
+      const n = xorshift32(this.items.length) % 8;
+      const s = this.add.sprite(i.pos.x, i.pos.y, `t${n}`);
       this.items.push(s)
-      s.setScale(0.3);
+      s.setScale(0.2);
     }
     this.countDownText = this.addText(
       '3',

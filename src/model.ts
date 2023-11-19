@@ -5,7 +5,29 @@ type Rectangle = Phaser.Geom.Rectangle;
 const Rectangle = Phaser.Geom.Rectangle;
 type Vector2 = Phaser.Math.Vector2;
 const Vector2 = Phaser.Math.Vector2;
+const v2 = (x: number, y: number): Vector2 => {
+  return new Vector2(x, y);
+}
+
 const spliteR = 48;
+
+const vecAdd = (a: Vector2, b: Vector2): Vector2 => {
+  return v2(a.x + b.x, a.y + b.y);
+}
+const vecMul = (a: Vector2 | number, b: Vector2 | number): Vector2 => {
+  if (typeof a === 'object') {
+    const nb = b as number;
+    return v2(a.x * nb, a.y * nb);
+  } else if (typeof b === 'object') {
+    const na = a as number;
+    return v2(na * b.x, na * b.y);
+  } else {
+    throw `a or b should be vector : a:${a}, b:${b}`;
+  }
+}
+const vecSub = (a: Vector2, b: Vector2): Vector2 => {
+  return v2(a.x - b.x, a.y - b.y);
+}
 
 const clamp = (x: number, v0: number, v1: number): number => {
   const min = Math.min(v0, v1);
@@ -59,10 +81,61 @@ class Item {
   }
 }
 
+class Line {
+  readonly p0: Vector2;
+  readonly p1: Vector2;
+  constructor(points: Vector2[], ix: integer) {
+    this.p0 = points[ix];
+    this.p1 = points[(ix + 1) % points.length];
+  };
+  len(): number {
+    return this.p0.distance(this.p1);
+  }
+  posAt(i: number): (Vector2 | null) {
+    let r = i / this.len();
+    if (1 < r) {
+      return null;
+    }
+    return vecAdd(this.p0, vecMul(r, vecSub(this.p1, this.p0)));
+  }
+}
+
 export interface GameScene {
   onItemStateChanged(ix: integer): void;
 }
 
+const itemPositions = (stage: Rectangle): Vector2[] => {
+  const g = stage.width / 10;
+  let points: Vector2[] = [
+    v2(g, g),
+    v2(stage.right - g, g),
+    v2(stage.right - g, stage.bottom - g),
+    v2(g, stage.bottom - g),
+  ];
+  const paths = [
+    new Line(points, 0),
+    new Line(points, 1),
+    new Line(points, 2),
+    new Line(points, 3),
+  ]
+  const total = paths.reduce((acc, cur): number => {
+    return acc + cur.len();
+  }, 0);
+  let r: Vector2[] = [];
+  const nofItems = 20;
+  for (let i = 0; i < nofItems; i++) {
+    let lpos = total * i / nofItems;
+    for (let p of paths) {
+      let pos = p.posAt(lpos);
+      if (pos) {
+        r.push(pos);
+        break;
+      }
+      lpos -= p.len();
+    }
+  }
+  return r;
+}
 export class Model {
   hitRadius(): number { return 50; }
   stage: Rectangle = new Rectangle(spliteR, spliteR, Settings.bgSize.x - spliteR * 2, Settings.bgSize.y - spliteR * 2);
@@ -77,12 +150,8 @@ export class Model {
     const x = (rx: number): number => {
       return this.stage.left + this.stage.width * rx;
     };
-    for (let ry = 0.1; ry < 0.2; ry += 0.05) {
-      const y = this.stage.top + this.stage.height * ry;
-      this.items.push(new Item(new Vector2(x(0.2), y)));
-      this.items.push(new Item(new Vector2(x(0.4), y)));
-      this.items.push(new Item(new Vector2(x(0.6), y)));
-      this.items.push(new Item(new Vector2(x(0.8), y)));
+    for (let pos of itemPositions(this.stage)) {
+      this.items.push(new Item(pos));
     }
   }
   imageIx(): integer {

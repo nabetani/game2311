@@ -7,10 +7,6 @@ type Vector2 = Phaser.Math.Vector2;
 const Vector2 = Phaser.Math.Vector2;
 const spliteR = 48;
 
-const centerOfRect = (r: Rectangle): Vector2 => {
-  return new Vector2(r.centerX, r.centerY);
-}
-
 const clamp = (x: number, v0: number, v1: number): number => {
   const min = Math.min(v0, v1);
   const max = Math.max(v0, v1);
@@ -98,7 +94,6 @@ export class Model {
     return this.player.angle;
   }
   isCompleted(): boolean {
-    console.log(this.items);
     return this.items.every(e => { return !e.visible });
   }
 

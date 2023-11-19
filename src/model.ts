@@ -24,6 +24,14 @@ class Player {
   deltaAngle: number = 0;
   velo: number = 0;
   pos: Vector2;
+  poiPos(): Vector2 {
+    const t = (Math.PI / 180) * (this.angle - 90);
+    const r = 120;
+    const dx = r * Math.cos(t);
+    const dy = r * Math.sin(t);
+    return new Vector2(
+      this.pos.x + dx, this.pos.y + dy);
+  }
   constructor(pos: Vector2) {
     this.pos = pos;
   }
@@ -90,9 +98,10 @@ export class Model {
   }
   progress(down: boolean, v: number) {
     this.player.progress(down, v, this.stage);
+    const poiPos = this.player.poiPos();
     for (let ix = 0; ix < this.items.length; ix++) {
       const i = this.items[ix];
-      if (i.pos.distance(this.player.pos) < this.hitRadius()) {
+      if (i.pos.distance(poiPos) < this.hitRadius()) {
         if (i.visible) {
           i.visible = false;
           this.gScene.onItemStateChanged(ix);

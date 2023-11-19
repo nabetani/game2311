@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
+import { Vector } from 'matter';
 
 type Phase = Countdown | Driving
 
@@ -61,7 +62,9 @@ export class GameMain extends BaseScene implements GameScene {
     zone.setInteractive();
     zone.on('pointerup', () => { this.model.pointerup(); });
     zone.on('pointerdown', () => { this.model.pointerdown(); });
-    this.addSprite(0, 0, "ship");
+    this.addSprite(0, -1000, "poi");
+    this.addSprite(0, -1000, "ship");
+    this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
     for (let i of this.model.items) {
       const s = this.add.sprite(i.pos.x, i.pos.y, "p0");
       this.items.push(s)
@@ -105,13 +108,15 @@ export class GameMain extends BaseScene implements GameScene {
     return 0 != (this.input.activePointer.buttons & 1);
   }
 
+  locate(p: Phaser.GameObjects.Sprite, angle: number, pos: Phaser.Math.Vector2) {
+    p.setAngle(angle);
+    p.setPosition(pos.x, pos.y);
+  }
 
   progressDriving(v: number) {
     this.model.progress(this.isPressing(), v);
-    const p = this.sprites["ship"];
-    p.setAngle(this.model.pAngle());
-    const pos = this.model.player.pos;
-    p.setPosition(pos.x, pos.y);
+    this.locate(this.sprites.ship, this.model.pAngle(), this.model.player.pos);
+    this.locate(this.sprites.poi, this.model.pAngle(), this.model.player.poiPos());
   }
 
   update() {

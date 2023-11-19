@@ -119,10 +119,11 @@ export class GameMain extends BaseScene implements GameScene {
   }
 
   showTick(tick: number) {
-    let sec = tick / this.fps();
-    let i = Math.floor(sec);
-    let f = `00${(sec - i) * 100}`.slice(-2)
-    this.tickText?.setText(`${i}.${f} s`);
+    let decaSec = Math.round(tick * 100 / this.fps());
+    let f = decaSec % 100;
+    let fs = `00${f}`.slice(-2);
+    let i = (decaSec - f) / 100;
+    this.tickText?.setText(`${i}.${fs} s`);
   }
   setGoText(tick: number) {
     const t = tick / 30 - 1;

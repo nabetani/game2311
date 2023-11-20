@@ -11,8 +11,18 @@ const v2 = (x: number, y: number): Vector2 => {
 
 const spliteR = 48;
 
-const vecAdd = (a: Vector2, b: Vector2): Vector2 => {
-  return v2(a.x + b.x, a.y + b.y);
+const vecAdd = (...a: Vector2[]): Vector2 => {
+  switch (a.length) {
+    case 0:
+      return v2(0, 0);
+    case 1:
+      return a[0];
+    case 2:
+      return v2(a[0].x + a[1].x, a[0].y + a[1].y);
+    default:
+      const n = Math.floor(a.length / 2);
+      return vecAdd(vecAdd(...a.slice(0, n)), vecAdd(...a.slice(n)));
+  }
 }
 const vecMul = (a: Vector2 | number, b: Vector2 | number): Vector2 => {
   if (typeof a === 'object') {
@@ -84,11 +94,9 @@ class Item {
 class Line {
   readonly p0: Vector2;
   readonly p1: Vector2;
-  readonly curve: number;
-  constructor(points: Vector2[], ix: integer, curve: number) {
+  constructor(points: Vector2[], ix: integer) {
     this.p0 = points[ix];
     this.p1 = points[(ix + 1) % points.length];
-    this.curve = curve;
   };
   len(): number {
     return this.p0.distance(this.p1);
@@ -98,6 +106,8 @@ class Line {
     if (1 < r) {
       return null;
     }
+    const v = vecSub(this.p1, this.p0);
+    const h = v2(-v.y, v.x);
     return vecAdd(this.p0, vecMul(r, vecSub(this.p1, this.p0)));
   }
 }
@@ -107,13 +117,13 @@ export interface GameScene {
 }
 
 const itemPositions = (stage: Rectangle): Vector2[] => {
-  const g = stage.width / 10;
+  const g = stage.width / 5;
   const x0 = g;
   const x3 = stage.right - g;
   const x1 = (x0 * 2 + x3) / 3;
   const x2 = (x0 + x3 * 2) / 3;
   const y0 = 100;
-  const y2 = stage.bottom - 100;
+  const y2 = stage.bottom - 200;
   const y1 = (y0 * 2 + y2) / 3;
   let points: Vector2[] = [
     v2(x0, y0), v2(x0, y2),
@@ -122,7 +132,7 @@ const itemPositions = (stage: Rectangle): Vector2[] => {
     v2(x3, y2), v2(x3, y0),
   ];
   const paths = Array.from(points.keys()).map((ix) => {
-    return new Line(points, ix, (ix % 2) * 2 - 1);
+    return new Line(points, ix);
   });
   const total = paths.reduce((acc, cur): number => {
     return acc + cur.len();
@@ -134,7 +144,9 @@ const itemPositions = (stage: Rectangle): Vector2[] => {
     for (let p of paths) {
       let pos = p.posAt(lpos);
       if (pos) {
-        r.push(pos);
+        const ry = (pos.y - y0) / (y2 - y0);
+        const d = ry * (1 - ry) * 0.5 * (x3 - x0);
+        r.push(v2(pos.x + d, pos.y));
         break;
       }
       lpos -= p.len();
@@ -145,10 +157,7 @@ const itemPositions = (stage: Rectangle): Vector2[] => {
 export class Model {
   hitRadius(): number { return 50; }
   stage: Rectangle = new Rectangle(spliteR, spliteR, Settings.bgSize.x - spliteR * 2, Settings.bgSize.y - spliteR * 2);
-  player: Player = new Player(
-    new Vector2(
-      this.stage.left + this.stage.width * 0.9,
-      this.stage.top + this.stage.height * 0.9));
+  player: Player = new Player(v2(this.stage.centerX, this.stage.bottom));
   items: Item[] = [];
   gScene: GameScene;
   constructor(gScene: GameScene) {

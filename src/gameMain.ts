@@ -5,6 +5,14 @@ import { Vector } from 'matter';
 
 type Phase = Countdown | Driving | YouDidIt;
 
+const rankString = (t: number): string => {
+  if (60 * 120 < t) {
+    return "Nice try";
+  }
+  return "Are you a human being?";
+}
+
+
 class PhaseType {
   scene: GameMain;
   constructor(scene: GameMain) {
@@ -14,12 +22,15 @@ class PhaseType {
 
 class YouDidIt extends PhaseType {
   tick: number = 0
-  constructor(scene: GameMain) {
+  constructor(scene: GameMain, driveTick: number) {
     super(scene);
-    scene.startYouDidIt();
+    scene.startYouDidIt(driveTick);
   }
   progress(): Phase {
     ++this.tick;
+    if (3 * 60 < this.tick) {
+      this.scene.showTryAgainText(true);
+    }
     return this;
   }
 }
@@ -28,6 +39,7 @@ class Countdown extends PhaseType {
   tick: number = 0
   constructor(scene: GameMain) {
     super(scene);
+    scene.startCountDown();
   }
   progress(): Phase {
     ++this.tick;
@@ -48,7 +60,8 @@ class Driving extends PhaseType {
     this.scene.setGoText(this.tick);
     this.scene.progressDriving(1);
     this.scene.showTick(this.tick);
-    return this.scene.model.isCompleted() ? new YouDidIt(this.scene) : this;
+    // return new YouDidIt(this.scene, this.tick);
+    return this.scene.model.isCompleted() ? new YouDidIt(this.scene, this.tick) : this;
   }
 }
 
@@ -72,8 +85,11 @@ export class GameMain extends BaseScene implements GameScene {
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
   phase: Phase = new Countdown(this);
+  youDidItText: Phaser.GameObjects.Text | null = null
+  rankText: Phaser.GameObjects.Text | null = null
   countDownText: Phaser.GameObjects.Text | null = null
   tickText: Phaser.GameObjects.Text | null = null
+  tryAgainText: Phaser.GameObjects.Text | null = null
   constructor() {
     super('GameMain');
   }
@@ -112,10 +128,26 @@ export class GameMain extends BaseScene implements GameScene {
       '3',
       this.canX(0.5), this.canY(0.5), 0.5,
       { fontSize: '120px' });
+    this.youDidItText = this.addText(
+      '',
+      this.canX(0.5), this.canY(0.3), 0.5,
+      { fontSize: '60px' });
+    this.rankText = this.addText(
+      '',
+      this.canX(0.5), this.canY(0.4), 0.5,
+      { fontSize: '35px' });
     this.tickText = this.addText(
       '',
       this.canX(0.05), this.canY(0.05), 0,
       { fontSize: '40px' });
+    this.tryAgainText = this.addText(
+      'Click to try again',
+      this.canX(0.5), this.canY(0.8), 0.5,
+      { fontSize: '40px' });
+    this.tryAgainText.on('pointerup', () => {
+      this.phase = new Countdown(this);
+    });
+    this.showTryAgainText(false);
   }
 
   showTick(tick: number) {
@@ -135,8 +167,26 @@ export class GameMain extends BaseScene implements GameScene {
       this.countDownText?.setText("");
     }
   }
-  startYouDidIt() {
-    this.countDownText?.setText("");
+  startYouDidIt(driveTick: number) {
+    this.youDidItText?.setText("COMPLETED!");
+    this.youDidItText?.setVisible(true);
+    this.rankText?.setText(rankString(driveTick));
+    this.rankText?.setVisible(true);
+  }
+  showTryAgainText(sw: boolean) {
+    this.tryAgainText?.setVisible(sw);
+    this.tryAgainText?.setInteractive(sw);
+  }
+
+  startCountDown() {
+    this.showTryAgainText(false);
+    this.youDidItText?.setVisible(false);
+    this.rankText?.setVisible(false);
+
+    this.model = new Model(this);
+    for (let i of this.items) {
+      i.setVisible(true);
+    }
   }
   startDriving() {
     this.countDownText?.setAlpha(1);

@@ -132,8 +132,8 @@ export class GameMain extends BaseScene implements GameScene {
     this.addSprite(0, -1000, "ship");
     for (let i = 1; i <= 25; ++i) {
       const g = 100;
-      const x = xorshift32(i + 1234) % (512 + g * 2) - g;
-      const y = xorshift32(i + 1234) % (900 + g * 2) - g;
+      const x = xorshift32(i + 1234) % (this.canX(1) + g * 2) - g;
+      const y = xorshift32(i + 1234) % (this.canY(1) + g * 2) - g;
       const a = xorshift32(i + 1234) % 360;
       const imname = `fish${Math.floor(Math.sqrt(i) - 1)}`;
       const spname = `fish${i - 1}`;
@@ -265,10 +265,10 @@ export class GameMain extends BaseScene implements GameScene {
       let x = s.x + v * dx;
       let y = s.y + v * dy;
       const g = 100
-      if (x < -g) { x = 512 + g; }
-      else if (g + 512 < x) { x = - g; };
-      if (y < -g) { x = 900 + g; }
-      else if (900 + g < y) { y = - g; };
+      if (x < -g) { x = this.canX(1) + g; }
+      else if (g + this.canX(1) < x) { x = - g; };
+      if (y < -g) { x = this.canY(1) + g; }
+      else if (this.canY(1) + g < y) { y = - g; };
       s.setPosition(x, y);
       s.setAngle(s.angle + (xorshift32(x + y) % 11 - 5) / 10)
 
@@ -286,7 +286,7 @@ export class GameMain extends BaseScene implements GameScene {
       const c = Math.cos(a);
       const x = k * Math.cos(t);
       const y = k * Math.sin(t * 0.123);
-      return [c * x + s * y + 256, -s * x + c * y + 512];
+      return [c * x + s * y + this.canX(0.5), -s * x + c * y + this.canX(1)];
     }
     this.waves[0].setPosition(...pos(0));
     this.waves[1].setPosition(...pos(1));

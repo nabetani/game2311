@@ -1,7 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
-import { Vector } from 'matter';
 
 type Phase = Countdown | Driving | YouDidIt
 const baseItemScale = 0.2;
@@ -118,6 +117,37 @@ export class GameMain extends BaseScene implements GameScene {
     });
   }
 
+  createFish() {
+    for (let i = 1; i <= 25; ++i) {
+      const g = 100;
+      const x = xorshift32(i + 1234) % (this.canX(1) + g * 2) - g;
+      const y = xorshift32(i + 1234) % (this.canY(1) + g * 2) - g;
+      const a = xorshift32(i + 1234) % 360;
+      const imname = `fish${Math.floor(Math.sqrt(i) - 1)}`;
+      const spname = `fish${i - 1}`;
+      this.addSprite(x, y, imname, spname)
+      const s = this.sprites[spname];
+      s.setAngle(a).setDepth(-100 - i);
+    }
+  }
+
+  createTexts() {
+    const text = (s: string, rx: number, ry: number, o: number, f: number): Phaser.GameObjects.Text => {
+      return this.addText(s, this.canX(rx), this.canY(ry), o, {
+        fontSize: `${f}px`
+      });
+    }
+    this.countDownText = text("3", 0.5, 0.5, 0.5, 120);
+    this.youDidItText = text("", 0.5, 0.3, 0.5, 60);
+    this.rankText = text("", 0.5, 0.4, 0.5, 35);
+    this.tickText = text("", 0.05, 0.05, 0, 40);
+    this.tryAgainText = text('Click to try again', 0.5, 0.8, 0.5, 40);
+    this.tryAgainText.on('pointerup', () => {
+      this.phase = new Countdown(this);
+    });
+    this.showTryAgainText(false);
+  }
+
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG').setDepth(-200);
     this.waves = [
@@ -130,17 +160,7 @@ export class GameMain extends BaseScene implements GameScene {
     zone.on('pointerdown', () => { this.model.pointerdown(); });
     this.addSprite(0, -1000, "poi");
     this.addSprite(0, -1000, "ship");
-    for (let i = 1; i <= 25; ++i) {
-      const g = 100;
-      const x = xorshift32(i + 1234) % (this.canX(1) + g * 2) - g;
-      const y = xorshift32(i + 1234) % (this.canY(1) + g * 2) - g;
-      const a = xorshift32(i + 1234) % 360;
-      const imname = `fish${Math.floor(Math.sqrt(i) - 1)}`;
-      const spname = `fish${i - 1}`;
-      this.addSprite(x, y, imname, spname)
-      const s = this.sprites[spname];
-      s.setAngle(a).setDepth(-100 - i);
-    }
+    this.createFish();
     this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
     for (let i of this.model.items) {
       const n = xorshift32(this.items.length) % 8;
@@ -148,30 +168,7 @@ export class GameMain extends BaseScene implements GameScene {
       this.items.push(s)
       s.setScale(baseItemScale);
     }
-    this.countDownText = this.addText(
-      '3',
-      this.canX(0.5), this.canY(0.5), 0.5,
-      { fontSize: '120px' });
-    this.youDidItText = this.addText(
-      '',
-      this.canX(0.5), this.canY(0.3), 0.5,
-      { fontSize: '60px' });
-    this.rankText = this.addText(
-      '',
-      this.canX(0.5), this.canY(0.4), 0.5,
-      { fontSize: '35px' });
-    this.tickText = this.addText(
-      '',
-      this.canX(0.05), this.canY(0.05), 0,
-      { fontSize: '40px' });
-    this.tryAgainText = this.addText(
-      'Click to try again',
-      this.canX(0.5), this.canY(0.8), 0.5,
-      { fontSize: '40px' });
-    this.tryAgainText.on('pointerup', () => {
-      this.phase = new Countdown(this);
-    });
-    this.showTryAgainText(false);
+    this.createTexts();
   }
 
   showTick(tick: number) {

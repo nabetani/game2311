@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
 
-type Phase = Countdown | Driving | YouDidIt
+type Phase = Countdown | Driving | YouDidIt | StartPhase;
 const baseItemScale = 0.2;
 
 const rankString = (t: number): string => {
@@ -17,6 +17,16 @@ class PhaseType {
   scene: GameMain;
   constructor(scene: GameMain) {
     this.scene = scene;
+  }
+}
+
+class StartPhase {
+  scene: GameMain;
+  constructor(scene: GameMain) {
+    this.scene = scene;
+  }
+  progress(): Phase {
+    return new Countdown(this.scene);
   }
 }
 
@@ -84,7 +94,7 @@ const xorshift32 = (n: number): integer => {
 export class GameMain extends BaseScene implements GameScene {
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
-  phase: Phase = new Countdown(this);
+  phase: Phase = new StartPhase(this);
   youDidItText: Phaser.GameObjects.Text | null = null
   rankText: Phaser.GameObjects.Text | null = null
   countDownText: Phaser.GameObjects.Text | null = null
@@ -113,6 +123,7 @@ export class GameMain extends BaseScene implements GameScene {
       fish2: "devil.png",
       fish3: "manta.png",
       fish4: "wshark.png",
+      share: "share.png",
       ...tights()
     });
   }
@@ -147,7 +158,16 @@ export class GameMain extends BaseScene implements GameScene {
     });
     this.showTryAgainText(false);
   }
+  onShareButton() {
+    const text = [
+      "Time: " + (this.tickText?.text || "??"),
+      "#PoiTights",
+      "https://nabetani.sakura.ne.jp/game2311/",
+    ].join("\n");
+    const encoded = encodeURIComponent(text);
+    window.open("https://taittsuu.com/share?text=" + encoded);
 
+  }
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG').setDepth(-200);
     this.waves = [
@@ -160,6 +180,11 @@ export class GameMain extends BaseScene implements GameScene {
     zone.on('pointerdown', () => { this.model.pointerdown(); });
     this.addSprite(0, -1000, "poi");
     this.addSprite(0, -1000, "ship");
+
+    this.addSprite(this.canX(0.8), this.canY(0.9), "share");
+    this.sprites.share.setInteractive();
+    this.sprites.share.on('pointerdown', () => this.onShareButton());
+
     this.createFish();
     this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
     for (let i of this.model.items) {
@@ -193,6 +218,8 @@ export class GameMain extends BaseScene implements GameScene {
     this.youDidItText?.setVisible(true);
     this.rankText?.setText(rankString(driveTick));
     this.rankText?.setVisible(true);
+    this.sprites.share.setVisible(true);
+
   }
   showTryAgainText(sw: boolean) {
     this.tryAgainText?.setVisible(sw);
@@ -203,6 +230,7 @@ export class GameMain extends BaseScene implements GameScene {
     this.showTryAgainText(false);
     this.youDidItText?.setVisible(false);
     this.rankText?.setVisible(false);
+    this.sprites.share.setVisible(false);
 
     this.model = new Model(this);
     for (let i of this.items) {

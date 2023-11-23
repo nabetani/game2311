@@ -3,7 +3,8 @@ import { BaseScene } from './baseScene';
 import { Model, GameScene } from './model';
 import { Vector } from 'matter';
 
-type Phase = Countdown | Driving | YouDidIt;
+type Phase = Countdown | Driving | YouDidIt
+const baseItemScale = 0.2;
 
 const rankString = (t: number): string => {
   if (60 * 120 < t) {
@@ -122,7 +123,7 @@ export class GameMain extends BaseScene implements GameScene {
       const n = xorshift32(this.items.length) % 8;
       const s = this.add.sprite(i.pos.x, i.pos.y, `t${n}`);
       this.items.push(s)
-      s.setScale(0.2);
+      s.setScale(baseItemScale);
     }
     this.countDownText = this.addText(
       '3',
@@ -215,9 +216,18 @@ export class GameMain extends BaseScene implements GameScene {
   }
 
   progressDriving(v: number) {
+    const t = this.time.now.valueOf();
     this.model.progress(this.isPressing(), v);
     this.locate(this.sprites.ship, this.model.pAngle(), this.model.player.pos);
     this.locate(this.sprites.poi, this.model.pAngle(), this.model.player.poiPos());
+    let ix = 0;
+    for (let i of this.items) {
+      i.setAngle(((ix * 2011 + t * 4e-3 * (ix * 13 % 50 + 10))) % 360);
+      const a = ix * 2 + t * 1e-4 * (ix * 17 % 50 + 10);
+      const s = 1 - 0.2 * (1 - Math.sin(a));
+      i.setScale(baseItemScale * s);
+      ++ix;
+    }
   }
 
   update() {

@@ -94,6 +94,7 @@ export class GameMain extends BaseScene implements GameScene {
   constructor() {
     super('GameMain');
   }
+  waves: Phaser.GameObjects.Image[] = []
   preload() {
     const tights = (): { [key: string]: string } => {
       let r: { [key: string]: string } = {}
@@ -106,12 +107,18 @@ export class GameMain extends BaseScene implements GameScene {
       mainBG: "mainBG.jpg",
       ship: "ship.png",
       poi: "poi.png",
+      wave0: "wave0.png",
+      wave1: "wave1.png",
       ...tights()
     });
   }
 
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG');
+    this.waves = [
+      this.add.image(this.canX(0.5), this.canY(0.5), 'wave0').setAlpha(0.5),
+      this.add.image(this.canX(0.5), this.canY(0.5), 'wave1').setAlpha(0.5),
+    ]
     const zone = this.add.zone(this.canX(0.5), this.canY(0.5), this.canX(1), this.canY(1));
     zone.setInteractive();
     zone.on('pointerup', () => { this.model.pointerup(); });
@@ -231,6 +238,19 @@ export class GameMain extends BaseScene implements GameScene {
   }
 
   update() {
+    const tick = this.time.now.valueOf();
+    const pos = (d: number): number[] => {
+      const t = tick * 1e-3 + d;
+      const k = 20;
+      const a = t * 0.01;
+      const s = Math.sin(a);
+      const c = Math.cos(a);
+      const x = k * Math.cos(t);
+      const y = k * Math.sin(t * 0.123);
+      return [c * x + s * y + 256, -s * x + c * y + 512];
+    }
+    this.waves[0].setPosition(...pos(0));
+    this.waves[1].setPosition(...pos(1));
     this.phase = this.phase.progress();
   }
 }

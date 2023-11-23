@@ -109,12 +109,17 @@ export class GameMain extends BaseScene implements GameScene {
       poi: "poi.png",
       wave0: "wave0.png",
       wave1: "wave1.png",
+      fish0: "fish0.png",
+      fish1: "fish1.png",
+      fish2: "devil.png",
+      fish3: "manta.png",
+      fish4: "wshark.png",
       ...tights()
     });
   }
 
   create() {
-    this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG');
+    this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG').setDepth(-200);
     this.waves = [
       this.add.image(this.canX(0.5), this.canY(0.5), 'wave0').setAlpha(0.5),
       this.add.image(this.canX(0.5), this.canY(0.5), 'wave1').setAlpha(0.5),
@@ -125,6 +130,17 @@ export class GameMain extends BaseScene implements GameScene {
     zone.on('pointerdown', () => { this.model.pointerdown(); });
     this.addSprite(0, -1000, "poi");
     this.addSprite(0, -1000, "ship");
+    for (let i = 1; i <= 25; ++i) {
+      const g = 100;
+      const x = xorshift32(i + 1234) % (512 + g * 2) - g;
+      const y = xorshift32(i + 1234) % (900 + g * 2) - g;
+      const a = xorshift32(i + 1234) % 360;
+      const imname = `fish${Math.floor(Math.sqrt(i) - 1)}`;
+      const spname = `fish${i - 1}`;
+      this.addSprite(x, y, imname, spname)
+      const s = this.sprites[spname];
+      s.setAngle(a).setDepth(-100 - i);
+    }
     this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
     for (let i of this.model.items) {
       const n = xorshift32(this.items.length) % 8;
@@ -236,8 +252,31 @@ export class GameMain extends BaseScene implements GameScene {
       ++ix;
     }
   }
+  updateFish() {
+    for (let i = 0; ; ++i) {
+      const s = this.sprites[`fish${i}`]
+      if (!s) {
+        break;
+      }
+      const t = (s.angle - 90) * (Math.PI / 180);
+      const dx = Math.cos(t);
+      const dy = Math.sin(t);
+      const v = 1;
+      let x = s.x + v * dx;
+      let y = s.y + v * dy;
+      const g = 100
+      if (x < -g) { x = 512 + g; }
+      else if (g + 512 < x) { x = - g; };
+      if (y < -g) { x = 900 + g; }
+      else if (900 + g < y) { y = - g; };
+      s.setPosition(x, y);
+      s.setAngle(s.angle + (xorshift32(x + y) % 11 - 5) / 10)
+
+    }
+  }
 
   update() {
+    this.updateFish();
     const tick = this.time.now.valueOf();
     const pos = (d: number): number[] => {
       const t = tick * 1e-3 + d;

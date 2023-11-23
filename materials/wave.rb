@@ -3,7 +3,7 @@ W0=H0=300
 noises = "+noise Gaussian -normalize "*10
 init = "-size #{W0}x#{H0} xc:black -colorspace gray -depth 16"
 blur = [
-  "-gaussian-blur #{W0/5}x5 -normalize",
+  "-gaussian-blur #{W0/5}x7 -normalize",
 ].join(" ")
 %x(convert #{init} #{noises} #{blur} base.png)
 %x(convert base.png -gaussian-blur #{W0/5}x10 -negate lowpass.png)

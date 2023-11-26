@@ -248,6 +248,7 @@ export class GameMain extends BaseScene implements GameScene {
 
   onItemStateChanged(ix: integer): void {
     this.items[ix].setVisible(this.model.items[ix].visible);
+    this.audios.get.play();
   }
 
   isPressing(): boolean {

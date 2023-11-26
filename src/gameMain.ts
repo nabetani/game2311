@@ -85,7 +85,6 @@ export class GameMain extends BaseScene implements GameScene {
   countDownText: Phaser.GameObjects.Text | null = null
   tickText: Phaser.GameObjects.Text | null = null
   tryAgainText: Phaser.GameObjects.Text | null = null
-  bgm: Audio = this.NoSound.create();
   constructor() {
     super('GameMain');
   }
@@ -98,7 +97,10 @@ export class GameMain extends BaseScene implements GameScene {
       }
       return r;
     };
-    this.load.audio("bgm", "assets/bgm2.m4a");
+    this.loadAudios({
+      bgm: "bgm2.m4a",
+      get: "get.m4a",
+    });
     this.loadImages({
       mainBG: "mainBG.jpg",
       ship: "ship.png",
@@ -113,19 +115,6 @@ export class GameMain extends BaseScene implements GameScene {
       share: "share.png",
       ...tights()
     });
-  }
-
-  setBGM() {
-    const conf: Phaser.Types.Sound.SoundConfig = {
-      // seek: 0.02,
-      loop: true,
-      volume: 0.2,
-    };
-    if (true) {
-      this.bgm = this.sound.add("bgm", conf);
-    } else {
-      this.bgm = this.NoSound.create();
-    }
   }
 
   createFish() {
@@ -196,7 +185,10 @@ export class GameMain extends BaseScene implements GameScene {
       s.setScale(baseItemScale);
     }
     this.createTexts();
-    this.setBGM();
+    this.prepareSounds(true, {
+      bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
+      get: "get",
+    });
   }
 
   showTick(tick: number) {
@@ -243,7 +235,7 @@ export class GameMain extends BaseScene implements GameScene {
   startDriving() {
     this.countDownText?.setAlpha(1);
     this.countDownText?.setText("GO!");
-    this.bgm.play();
+    this.audios.bgm.play();
   }
 
   setCountDownText(tick: number) {

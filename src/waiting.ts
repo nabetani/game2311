@@ -33,14 +33,9 @@ export class Wating extends BaseScene {
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'bg');
     this.createSoundUI();
-    const attr = { fontFamily: 'arial', fontSize: '60px' };
-    this.addText(
-      'Rotation Jump',
-      this.canX(0.5), this.canY(0.5), 0.5,
-      { fontSize: '60px' });
     const startText = this.addText(
       'Click here to start game.',
-      this.canX(0.5), this.canY(0.7), 0.5, { fontSize: "30px" });
+      this.canX(0.5), this.canY(0.35), 0.5, { fontSize: "35px", fontStyle: "bold" });
     startText.on('pointerdown', () => {
       this.scene.start('GameMain', { sound: this.soundOn });
     });

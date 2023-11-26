@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
-import { BaseScene } from './baseScene';
+import { BaseScene, Audio } from './baseScene';
 import { Model, GameScene } from './model';
+import * as Util from './util';
 
 type Phase = Countdown | Driving | YouDidIt | StartPhase;
 const baseItemScale = 0.2;
@@ -75,31 +76,6 @@ class Driving extends PhaseType {
   }
 }
 
-const xorshift32 = (n: number): integer => {
-  const x = (e: integer): integer => {
-    e ^= (e << 13);
-    e >>>= 0;
-    e ^= e >> 17;
-    e >>>= 0;
-    e ^= (e << 5);
-    return e >>> 0;
-  };
-  n += 123; // 全ゼロ回避
-  for (let i = 0; i < 20; ++i) {
-    n = x(n);
-  }
-  return n;
-};
-
-class NoSound {
-  play() { }
-  stop() { }
-};
-
-const noSound = () => new NoSound();
-
-type Audio = NoSound | Phaser.Sound.NoAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound;
-
 export class GameMain extends BaseScene implements GameScene {
   items: Phaser.GameObjects.Sprite[] = [];
   model: Model = new Model(this);
@@ -109,7 +85,7 @@ export class GameMain extends BaseScene implements GameScene {
   countDownText: Phaser.GameObjects.Text | null = null
   tickText: Phaser.GameObjects.Text | null = null
   tryAgainText: Phaser.GameObjects.Text | null = null
-  bgm: Audio = noSound();
+  bgm: Audio = this.NoSound.create();
   constructor() {
     super('GameMain');
   }
@@ -148,16 +124,17 @@ export class GameMain extends BaseScene implements GameScene {
     if (true) {
       this.bgm = this.sound.add("bgm", conf);
     } else {
-      this.bgm = noSound();
+      this.bgm = this.NoSound.create();
     }
   }
 
   createFish() {
+    const rng = new Util.Rng(0);
     for (let i = 1; i <= 25; ++i) {
       const g = 100;
-      const x = xorshift32(i + 1234) % (this.canX(1) + g * 2) - g;
-      const y = xorshift32(i + 1234) % (this.canY(1) + g * 2) - g;
-      const a = xorshift32(i + 1234) % 360;
+      const x = rng.next() % (this.canX(1) + g * 2) - g;
+      const y = rng.next() % (this.canY(1) + g * 2) - g;
+      const a = rng.next() % 360;
       const imname = `fish${Math.floor(Math.sqrt(i) - 1)}`;
       const spname = `fish${i - 1}`;
       this.addSprite(x, y, imname, spname)
@@ -211,8 +188,9 @@ export class GameMain extends BaseScene implements GameScene {
 
     this.createFish();
     this.sprites.poi.setDisplayOrigin(96 / 2, 96 / 2);
+    const rng = new Util.Rng(2);
     for (let i of this.model.items) {
-      const n = xorshift32(this.items.length) % 8;
+      const n = rng.next() % 8;
       const s = this.add.sprite(i.pos.x, i.pos.y, `t${n}`);
       this.items.push(s)
       s.setScale(baseItemScale);
@@ -304,6 +282,7 @@ export class GameMain extends BaseScene implements GameScene {
     }
   }
   updateFish() {
+
     for (let i = 0; ; ++i) {
       const s = this.sprites[`fish${i}`]
       if (!s) {
@@ -321,7 +300,7 @@ export class GameMain extends BaseScene implements GameScene {
       if (y < -g) { x = this.canY(1) + g; }
       else if (this.canY(1) + g < y) { y = - g; };
       s.setPosition(x, y);
-      s.setAngle(s.angle + (xorshift32(x + y) % 11 - 5) / 10)
+      s.setAngle(s.angle + (Util.xorshift32(x + y) % 11 - 5) / 10)
 
     }
   }

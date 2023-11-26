@@ -71,7 +71,7 @@ export class Wating extends BaseScene {
     );
     let ry = 0.95;
     const dry = 0.04;
-    this.addLink(0.96, ry, 1, "Source code and license", "https://github.com/nabetani/game2310/");
+    this.addLink(0.96, ry, 1, "Source code and license", "https://github.com/nabetani/game2311/");
     ry -= dry;
     this.addLink(0.96, ry, 1, "制作ノート", "https://nabetani.hatenadiary.com/entry/2023/11/game2311");
     ry -= dry;

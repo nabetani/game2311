@@ -55,7 +55,7 @@ class Countdown extends PhaseType {
   progress(): Phase {
     ++this.tick;
     this.scene.progressDriving(0);
-    this.scene.setCountDownText(this.tick);
+    this.scene.doCountDown(this.tick);
     return this.tick < 3 * this.scene.fps() ? this : new Driving(this.scene);
   }
 }
@@ -100,6 +100,8 @@ export class GameMain extends BaseScene implements GameScene {
     this.loadAudios({
       bgm: "bgm2.m4a",
       get: "get.m4a",
+      countdown: "countdown.m4a",
+      go: "go.m4a",
     });
     this.loadImages({
       mainBG: "mainBG.jpg",
@@ -188,6 +190,8 @@ export class GameMain extends BaseScene implements GameScene {
     this.prepareSounds(true, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
       get: "get",
+      countdown: new this.AddSound("countdown", { volume: 1 / 4 }),
+      go: new this.AddSound("go", { volume: 0.2 }),
     });
   }
 
@@ -222,6 +226,7 @@ export class GameMain extends BaseScene implements GameScene {
   }
 
   startCountDown() {
+    // this.audios.countdown.play();
     this.showTryAgainText(false);
     this.youDidItText?.setVisible(false);
     this.rankText?.setVisible(false);
@@ -235,14 +240,20 @@ export class GameMain extends BaseScene implements GameScene {
   startDriving() {
     this.countDownText?.setAlpha(1);
     this.countDownText?.setText("GO!");
+    this.audios.go.play();
     this.audios.bgm.play();
   }
 
-  setCountDownText(tick: number) {
+  doCountDown(tick: number) {
     const t = 3 - tick / this.fps();
+    const tp = 3 - (tick - 1) / this.fps();
     const ft = Math.floor(t + 0.5);
     const ft2 = Math.floor(t * 2 + 1) / 2;
+    const ft2p = Math.floor(tp * 2 + 1) / 2;
     this.countDownText?.setAlpha(1);
+    if (ft == ft2 && ft != ft2p) {
+      this.audios.countdown.play();
+    }
     this.countDownText?.setText((ft == ft2) ? `${ft}` : "");
   }
 

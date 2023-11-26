@@ -38,6 +38,15 @@ export class Wating extends BaseScene {
       window.location.href = url;
     });
   }
+  addTextText(rx: number, ry: number, g: number, longText: Phaser.GameObjects.Text, btnText: string, msg: string) {
+    const text = this.addText(
+      btnText,
+      this.canX(rx), this.canY(ry), g, { fontSize: "25px", backgroundColor: "#fff8" });
+    text.on('pointerdown', () => {
+      longText.setText(msg);
+      longText.setVisible(true);
+    });
+  }
 
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'bg');
@@ -48,6 +57,18 @@ export class Wating extends BaseScene {
     startText.on('pointerdown', () => {
       this.scene.start('GameMain', { sound: this.soundOn });
     });
+    let longText = this.addText("", this.canX(0.5), this.canY(0.7), 0.5,
+      { fontSize: "22px", backgroundColor: "#fffa", lineSpacing: 10 });
+    this.addTextText(
+      0.5, 0.5, 0.5,
+      longText,
+      "遊び方",
+      "押している間は左回転（反時計回り）\n" +
+      "離すと右回転（時計回り）\n" +
+      "あんまり回転してないと前に進みます。\n" +
+      "船の先端のポイでタイツに触れるとタイツ回収。\n" +
+      "50個のタイツをすべて回収してください。",
+    );
     let ry = 0.95;
     const dry = 0.04;
     this.addLink(0.96, ry, 1, "Source code and license", "https://github.com/nabetani/game2310/");

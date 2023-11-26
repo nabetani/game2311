@@ -54,7 +54,7 @@ export class BaseScene extends Phaser.Scene {
     }
   }
 
-  addText(msg: string, x: number, y: number, org: number, attr: { [key: string]: string }): Phaser.GameObjects.Text {
+  addText(msg: string, x: number, y: number, org: number, attr: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
     const baseAttr = { fontFamily: 'arial', fontSize: '40px', color: "black" };
     let text = this.add
       .text(x, y, msg, { ...baseAttr, ...attr })

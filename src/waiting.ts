@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { BaseScene } from './baseScene';
 
 export class Wating extends BaseScene {
+  soundOn: boolean = false
   constructor() {
     super('Wating');
   }
@@ -12,9 +13,10 @@ export class Wating extends BaseScene {
     });
   }
   createSoundUI() {
-    let soundOn = this.add.sprite(this.canX(0.8), 50, "soundOn");
-    let soundOff = this.add.sprite(this.canX(0.9), 50, "soundOff");
+    let soundOn = this.add.sprite(this.canX(0.6), 100, "soundOn");
+    let soundOff = this.add.sprite(this.canX(0.8), 100, "soundOff");
     const setSound = (on: boolean) => {
+      this.soundOn = on;
       const soundScale = 0.6;
       soundOn.setScale(on ? 1 : soundScale);
       soundOff.setScale(!on ? 1 : soundScale);
@@ -40,7 +42,7 @@ export class Wating extends BaseScene {
       'Click here to start game.',
       this.canX(0.5), this.canY(0.7), 0.5, { fontSize: "30px" });
     startText.on('pointerdown', () => {
-      this.scene.start('GameMain');
+      this.scene.start('GameMain', { sound: this.soundOn });
     });
   }
 }

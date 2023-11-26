@@ -159,9 +159,8 @@ export class GameMain extends BaseScene implements GameScene {
     ].join("\n");
     const encoded = encodeURIComponent(text);
     window.open("https://taittsuu.com/share?text=" + encoded);
-
   }
-  create() {
+  create(data: { sound: boolean }) {
     this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG').setDepth(-200);
     this.waves = [
       this.add.image(this.canX(0.5), this.canY(0.5), 'wave0').setAlpha(0.5),
@@ -188,7 +187,7 @@ export class GameMain extends BaseScene implements GameScene {
       s.setScale(baseItemScale);
     }
     this.createTexts();
-    this.prepareSounds(true, {
+    this.prepareSounds(data?.sound, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
       get: new this.AddSound("get", { volume: 1 / 4 }),
       goal: "goal",

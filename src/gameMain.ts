@@ -27,7 +27,7 @@ class StartPhase {
     this.scene = scene;
   }
   progress(): Phase {
-    return new Countdown(this.scene);
+    return this
   }
 }
 
@@ -85,6 +85,7 @@ export class GameMain extends BaseScene implements GameScene {
   countDownText: Phaser.GameObjects.Text | null = null
   tickText: Phaser.GameObjects.Text | null = null
   tryAgainText: Phaser.GameObjects.Text | null = null
+  zone: Phaser.GameObjects.Zone | null = null
   constructor() {
     super('GameMain');
   }
@@ -146,6 +147,7 @@ export class GameMain extends BaseScene implements GameScene {
     this.rankText = text("", 0.5, 0.4, 0.5, 35);
     this.tickText = text("", 0.05, 0.05, 0, 40);
     this.tryAgainText = text('Click to try again', 0.5, 0.8, 0.5, 40);
+    this.tryAgainText.setInteractive();
     this.tryAgainText.on('pointerup', () => {
       this.phase = new Countdown(this);
     });
@@ -158,18 +160,39 @@ export class GameMain extends BaseScene implements GameScene {
       "https://nabetani.sakura.ne.jp/game2311/",
     ].join("\n");
     const encoded = encodeURIComponent(text);
-    window.open("https://taittsuu.com/share?text=" + encoded);
+    this.sprites.share.setVisible(false);
+    const url = "https://taittsuu.com/share?text=" + encoded;
+    if (!window.open(url)) {
+      location.href = url;
+    }
   }
+  gamingUI(inGame: boolean) {
+    this.sprites.share.setVisible(!inGame);
+    // this.sprites.share.setInteractive(!inGame);
+    this.rankText?.setVisible(!inGame);
+    this.sprites.share.setVisible(!inGame);
+    this.youDidItText?.setVisible(!inGame);
+
+    // this.zone?.setInteractive(inGame);
+    this.zone?.setScale(inGame ? 1.0 : 0.0);
+
+    if (inGame) {
+      this.tryAgainText?.setVisible(false);
+      // this.tryAgainText?.setInteractive(false);
+    }
+  }
+
   create(data: { sound: boolean }) {
     this.add.image(this.canX(0.5), this.canY(0.5), 'mainBG').setDepth(-200);
     this.waves = [
       this.add.image(this.canX(0.5), this.canY(0.5), 'wave0').setAlpha(0.5),
       this.add.image(this.canX(0.5), this.canY(0.5), 'wave1').setAlpha(0.5),
     ]
-    const zone = this.add.zone(this.canX(0.5), this.canY(0.5), this.canX(1), this.canY(1));
-    zone.setInteractive();
-    zone.on('pointerup', () => { this.model.pointerup(); });
-    zone.on('pointerdown', () => { this.model.pointerdown(); });
+    this.zone = this.add.zone(this.canX(0.5), this.canY(0.5), this.canX(1), this.canY(1));
+    this.zone.setInteractive();
+
+    this.zone.on('pointerup', () => { this.model.pointerup(); });
+    this.zone.on('pointerdown', () => { this.model.pointerdown(); });
     this.addSprite(0, -1000, "poi");
     this.addSprite(0, -1000, "ship");
 
@@ -194,6 +217,7 @@ export class GameMain extends BaseScene implements GameScene {
       countdown: new this.AddSound("countdown", { volume: 1 / 4 }),
       go: new this.AddSound("go", { volume: 0.2 }),
     });
+    this.phase = new Countdown(this);
   }
 
   showTick(tick: number) {
@@ -214,25 +238,18 @@ export class GameMain extends BaseScene implements GameScene {
     }
   }
   startYouDidIt(driveTick: number) {
+    this.gamingUI(false);
     this.audios.goal.play();
     this.audios.bgm.stop();
     this.youDidItText?.setText("COMPLETED!");
-    this.youDidItText?.setVisible(true);
     this.rankText?.setText(rankString(driveTick));
-    this.rankText?.setVisible(true);
-    this.sprites.share.setVisible(true);
   }
   showTryAgainText(sw: boolean) {
     this.tryAgainText?.setVisible(sw);
-    this.tryAgainText?.setInteractive(sw);
   }
 
   startCountDown() {
-    // this.audios.countdown.play();
-    this.showTryAgainText(false);
-    this.youDidItText?.setVisible(false);
-    this.rankText?.setVisible(false);
-    this.sprites.share.setVisible(false);
+    this.gamingUI(true);
 
     this.model = new Model(this);
     for (let i of this.items) {

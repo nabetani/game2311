@@ -6,9 +6,30 @@ import * as Util from './util';
 type Phase = Countdown | Driving | YouDidIt | StartPhase;
 const baseItemScale = 0.2;
 
-const rankString = (t: number): string => {
-  if (60 * 120 < t) {
+const ranks = [
+  { t: 50, n: "a Beginner" },
+  { t: 30, n: "a Novice" },
+  { t: 20, n: "an Apprentice" },
+  { t: 15, n: "a Good Player" },
+  { t: 12, n: "a Very Good Player" },
+  { t: 10, n: "a Expert Player" },
+  { t: 9, n: "an Advanced Player" },
+  { t: 8, n: "a Super Advanced Player" },
+  { t: 7, n: "an Incredible Player" },
+  { t: 6, n: "a Master" },
+  { t: 5.5, n: "a Hero" },
+  { t: 5, n: "a Super Hero" },
+];
+
+const rankString = (ticks: number): string => {
+  const s = ticks / 60
+  if (120 < s) {
     return "Nice try";
+  }
+  for (let k of ranks) {
+    if (k.t < s) {
+      return "You are " + k.n;
+    }
   }
   return "Are you a human being?";
 }

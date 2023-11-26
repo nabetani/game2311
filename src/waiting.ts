@@ -30,14 +30,32 @@ export class Wating extends BaseScene {
     setSoundButton(soundOn, true);
     setSoundButton(soundOff, false);
   }
+  addLink(rx: number, ry: number, g: number, msg: string, url: string) {
+    const text = this.addText(
+      msg,
+      this.canX(rx), this.canY(ry), g, { fontSize: "20px", backgroundColor: "#fff8" });
+    text.on('pointerdown', () => {
+      window.location.href = url;
+    });
+  }
+
   create() {
     this.add.image(this.canX(0.5), this.canY(0.5), 'bg');
     this.createSoundUI();
     const startText = this.addText(
-      'Click here to start game.',
-      this.canX(0.5), this.canY(0.35), 0.5, { fontSize: "35px", fontStyle: "bold" });
+      '\n   Click here to start game.   \n',
+      this.canX(0.5), this.canY(0.4), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
     startText.on('pointerdown', () => {
       this.scene.start('GameMain', { sound: this.soundOn });
     });
+    let ry = 0.95;
+    const dry = 0.04;
+    this.addLink(0.96, ry, 1, "Source code and license", "https://github.com/nabetani/game2310/");
+    ry -= dry;
+    this.addLink(0.96, ry, 1, "制作ノート", "https://nabetani.hatenadiary.com/entry/2023/11/game2311");
+    ry -= dry;
+    this.addLink(0.96, ry, 1, "鍋谷武典 @ タイッツー", "https://taittsuu.com/users/nabetani");
+    ry -= dry;
+    this.addLink(0.96, ry, 1, " タイッツー #PoiTights", "https://taittsuu.com/search/taiitsus/hashtags?query=PoiTights");
   }
 }

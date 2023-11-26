@@ -102,6 +102,7 @@ export class GameMain extends BaseScene implements GameScene {
       get: "get.m4a",
       countdown: "countdown.m4a",
       go: "go.m4a",
+      goal: "goal.m4a",
     });
     this.loadImages({
       mainBG: "mainBG.jpg",
@@ -189,7 +190,8 @@ export class GameMain extends BaseScene implements GameScene {
     this.createTexts();
     this.prepareSounds(true, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
-      get: "get",
+      get: new this.AddSound("get", { volume: 1 / 4 }),
+      goal: "goal",
       countdown: new this.AddSound("countdown", { volume: 1 / 4 }),
       go: new this.AddSound("go", { volume: 0.2 }),
     });
@@ -213,12 +215,13 @@ export class GameMain extends BaseScene implements GameScene {
     }
   }
   startYouDidIt(driveTick: number) {
+    this.audios.goal.play();
+    this.audios.bgm.stop();
     this.youDidItText?.setText("COMPLETED!");
     this.youDidItText?.setVisible(true);
     this.rankText?.setText(rankString(driveTick));
     this.rankText?.setVisible(true);
     this.sprites.share.setVisible(true);
-
   }
   showTryAgainText(sw: boolean) {
     this.tryAgainText?.setVisible(sw);

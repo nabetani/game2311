@@ -60,8 +60,8 @@ class YouDidIt extends PhaseType {
   }
   progress(): Phase {
     ++this.tick;
-    if (3 * 60 < this.tick) {
-      this.scene.showTryAgainText(true);
+    if (2 * 60 < this.tick) {
+      this.scene.showDelayedGameOverUI();
     }
     return this;
   }
@@ -154,6 +154,7 @@ export class GameMain extends BaseScene implements GameScene {
       this.addSprite(x, y, imname, spname)
       const s = this.sprites[spname];
       s.setAngle(a).setDepth(-100 - i);
+      s.setData("da", 0);
     }
   }
 
@@ -172,7 +173,6 @@ export class GameMain extends BaseScene implements GameScene {
     this.tryAgainText.on('pointerup', () => {
       this.phase = new Countdown(this);
     });
-    this.showTryAgainText(false);
   }
   onShareButton() {
     const text = [
@@ -181,25 +181,19 @@ export class GameMain extends BaseScene implements GameScene {
       "https://nabetani.sakura.ne.jp/game2311/",
     ].join("\n");
     const encoded = encodeURIComponent(text);
-    this.sprites.share.setVisible(false);
     const url = "https://taittsuu.com/share?text=" + encoded;
     if (!window.open(url)) {
       location.href = url;
     }
   }
   gamingUI(inGame: boolean) {
-    this.sprites.share.setVisible(!inGame);
-    // this.sprites.share.setInteractive(!inGame);
     this.rankText?.setVisible(!inGame);
-    this.sprites.share.setVisible(!inGame);
     this.youDidItText?.setVisible(!inGame);
-
-    // this.zone?.setInteractive(inGame);
     this.zone?.setScale(inGame ? 1.0 : 0.0);
 
     if (inGame) {
+      this.sprites.share.setVisible(false);
       this.tryAgainText?.setVisible(false);
-      // this.tryAgainText?.setInteractive(false);
     }
   }
 
@@ -265,8 +259,9 @@ export class GameMain extends BaseScene implements GameScene {
     this.youDidItText?.setText("COMPLETED!");
     this.rankText?.setText(rankString(driveTick));
   }
-  showTryAgainText(sw: boolean) {
-    this.tryAgainText?.setVisible(sw);
+  showDelayedGameOverUI() {
+    this.tryAgainText?.setVisible(true);
+    this.sprites.share.setVisible(true);
   }
 
   startCountDown() {
@@ -326,7 +321,7 @@ export class GameMain extends BaseScene implements GameScene {
     }
   }
   updateFish() {
-
+    let rng = new Util.Rng((this.game.getTime() * 26021) >>> 0);
     for (let i = 0; ; ++i) {
       const s = this.sprites[`fish${i}`]
       if (!s) {
@@ -339,12 +334,14 @@ export class GameMain extends BaseScene implements GameScene {
       let x = s.x + v * dx;
       let y = s.y + v * dy;
       const g = 100
-      if (x < -g) { x = this.canX(1) + g; }
-      else if (g + this.canX(1) < x) { x = - g; };
-      if (y < -g) { x = this.canY(1) + g; }
-      else if (this.canY(1) + g < y) { y = - g; };
+      const wx = this.canX(1) + g * 2;
+      const wy = this.canY(1) + g * 2;
+      x = (x + g + wx * 2) % wx - g;
+      y = (y + g + wy * 2) % wy - g;
       s.setPosition(x, y);
-      s.setAngle(s.angle + (Util.xorshift32(x + y) % 11 - 5) / 10)
+      const da = s.getData("da") as number
+      s.setAngle(s.angle + da)
+      s.setData("da", Util.clamp(da + (rng.next() % 201 - 100) / 2000, -0.5, 0.5))
 
     }
   }

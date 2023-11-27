@@ -154,6 +154,7 @@ export class GameMain extends BaseScene implements GameScene {
       this.addSprite(x, y, imname, spname)
       const s = this.sprites[spname];
       s.setAngle(a).setDepth(-100 - i);
+      s.setData("da", 0);
     }
   }
 
@@ -326,7 +327,7 @@ export class GameMain extends BaseScene implements GameScene {
     }
   }
   updateFish() {
-
+    let rng = new Util.Rng((this.game.getTime() * 26021) >>> 0);
     for (let i = 0; ; ++i) {
       const s = this.sprites[`fish${i}`]
       if (!s) {
@@ -339,12 +340,14 @@ export class GameMain extends BaseScene implements GameScene {
       let x = s.x + v * dx;
       let y = s.y + v * dy;
       const g = 100
-      if (x < -g) { x = this.canX(1) + g; }
-      else if (g + this.canX(1) < x) { x = - g; };
-      if (y < -g) { x = this.canY(1) + g; }
-      else if (this.canY(1) + g < y) { y = - g; };
+      const wx = this.canX(1) + g * 2;
+      const wy = this.canY(1) + g * 2;
+      x = (x + g + wx * 2) % wx - g;
+      y = (y + g + wy * 2) % wy - g;
       s.setPosition(x, y);
-      s.setAngle(s.angle + (Util.xorshift32(x + y) % 11 - 5) / 10)
+      const da = s.getData("da") as number
+      s.setAngle(s.angle + da)
+      s.setData("da", Util.clamp(da + (rng.next() % 201 - 100) / 2000, -0.5, 0.5))
 
     }
   }

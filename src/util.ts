@@ -15,6 +15,12 @@ export const xorshift32 = (n0: number): integer => {
   return n;
 };
 
+export const clamp = (v: number, lo: number, hi: number): number => {
+  if (v < lo) { return lo; }
+  if (hi < v) { return hi; }
+  return v;
+}
+
 export class Rng {
   // from  pcg_oneseq_32_xsh_rs_16_random_r at https://github.com/imneme/pcg-c/
   state: integer

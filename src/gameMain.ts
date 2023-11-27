@@ -60,8 +60,8 @@ class YouDidIt extends PhaseType {
   }
   progress(): Phase {
     ++this.tick;
-    if (3 * 60 < this.tick) {
-      this.scene.showTryAgainText(true);
+    if (2 * 60 < this.tick) {
+      this.scene.showDelayedGameOverUI();
     }
     return this;
   }
@@ -173,7 +173,6 @@ export class GameMain extends BaseScene implements GameScene {
     this.tryAgainText.on('pointerup', () => {
       this.phase = new Countdown(this);
     });
-    this.showTryAgainText(false);
   }
   onShareButton() {
     const text = [
@@ -182,25 +181,19 @@ export class GameMain extends BaseScene implements GameScene {
       "https://nabetani.sakura.ne.jp/game2311/",
     ].join("\n");
     const encoded = encodeURIComponent(text);
-    this.sprites.share.setVisible(false);
     const url = "https://taittsuu.com/share?text=" + encoded;
     if (!window.open(url)) {
       location.href = url;
     }
   }
   gamingUI(inGame: boolean) {
-    this.sprites.share.setVisible(!inGame);
-    // this.sprites.share.setInteractive(!inGame);
     this.rankText?.setVisible(!inGame);
-    this.sprites.share.setVisible(!inGame);
     this.youDidItText?.setVisible(!inGame);
-
-    // this.zone?.setInteractive(inGame);
     this.zone?.setScale(inGame ? 1.0 : 0.0);
 
     if (inGame) {
+      this.sprites.share.setVisible(false);
       this.tryAgainText?.setVisible(false);
-      // this.tryAgainText?.setInteractive(false);
     }
   }
 
@@ -266,8 +259,9 @@ export class GameMain extends BaseScene implements GameScene {
     this.youDidItText?.setText("COMPLETED!");
     this.rankText?.setText(rankString(driveTick));
   }
-  showTryAgainText(sw: boolean) {
-    this.tryAgainText?.setVisible(sw);
+  showDelayedGameOverUI() {
+    this.tryAgainText?.setVisible(true);
+    this.sprites.share.setVisible(true);
   }
 
   startCountDown() {
